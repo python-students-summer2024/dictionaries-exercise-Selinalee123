@@ -28,10 +28,26 @@ def bake_cookies(filepath):
         cookie_info['title'] = row[1]
         cookie_info['description'] = row[2]
         cookie_info['price'] = round(float(row[3][1:]), 2)
+
+        # extar credit
+        if row[4] == 'True':
+            cookie_info['sugar_free'] = True
+        elif row[4] == 'False':
+            cookie_info['sugar_free'] = False
+        if row[5] == 'True':
+            cookie_info['gluten_free'] = True
+        elif row[5] == 'False':
+            cookie_info['gluten_free'] = False
+        if row[6] == 'True':
+            cookie_info['contains_nuts'] = True
+        elif row[6] == 'False':
+            cookie_info['contains_nuts'] = False    
+
         result.append(cookie_info)
 
     # print(result)
     return result
+
 
 
 def welcome():
@@ -46,8 +62,44 @@ def welcome():
     print("Welcome to the Python Cookie Shop!")
     print("We feed each according to their need.")
 
+    # === extar credit
+    print("We'd hate to trigger an allergic reaction in your body. So please answer the following questions:\n")
+    user_needs = {}
+    while True:
+        allergic_to_nuts = input("Are you allergic to nuts? ")
+        if allergic_to_nuts in ['yes', 'y']:
+            user_needs['can_intake_nuts'] = False
+            break
+        elif allergic_to_nuts in ['no', 'n']:
+            user_needs['can_intake_nuts'] = True
+            break
+        else:
+            continue
+    while True:
+        allergic_to_gluten = input("Are you allergic to gluten? ")
+        if allergic_to_gluten in ['yes', 'y']:
+            user_needs['can_intake_gluten'] = False
+            break
+        elif allergic_to_gluten in ['no', 'n']:
+            user_needs['can_intake_gluten'] = True
+            break
+        else:
+            continue
+    while True:
+        allergic_to_sugar = input("Do you suffer from diabetes? ")
+        if allergic_to_sugar in ['yes', 'y']:
+            user_needs['can_intake_sugar'] = False
+            break
+        elif allergic_to_sugar in ['no', 'n']:
+            user_needs['can_intake_sugar'] = True
+            break
+        else:
+            continue
 
-def display_cookies(cookies):
+    return user_needs
+
+
+def display_cookies(cookies, user_needs):
     """
     Prints a list of all cookies in the shop to the user.
     - Sample output - we show only two cookies here, but imagine the output continues for all cookiese:
@@ -68,6 +120,12 @@ def display_cookies(cookies):
     # write your code for this function below this line
     print("Here are the cookies we have in the shop for you:\n")
     for cookie in cookies:
+        if user_needs['can_intake_sugar'] == False and cookie['sugar_free'] == False:
+            continue
+        if user_needs['can_intake_gluten'] == False and cookie['gluten_free'] == False:
+            continue
+        if user_needs['can_intake_nuts'] == False and cookie['contains_nuts'] == True:
+            continue
         print('#'+str(cookie['id'])+' - '+str(cookie['title']+''))
         print(cookie['description']+'')
         print('Price: $'+"{:.2f}".format(cookie['price'])+'\n')
@@ -82,8 +140,6 @@ def get_cookie_from_dict(id, cookies):
     :returns: the matching cookie, as a dictionary
     """
     # write your code for this function below this line
-    # print("id: "+str(id))
-    # print(cookies)
     for cookie in cookies:
         if cookie['id'] == id:
             return cookie
@@ -208,7 +264,7 @@ def run_shop(cookies):
     :param cookies: A list of all cookies in the shop, where each cookie is represented as a dictionary.
     """
     # write your code for this function below here.
-    welcome()
-    display_cookies(cookies)
+    user_needs = welcome()
+    display_cookies(cookies, user_needs)
     order = solicit_order(cookies)
     display_order_total(order, cookies)
